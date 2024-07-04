@@ -19,30 +19,34 @@ class SettingController extends ResponseController
     {
         $this->middleware('auth:api');
     }
-    public function index(){
+    public function index()
+    {
         $user = auth()->guard('api')->user();
         $data['user'] = new UserResource($user);
         if ($user->user_type->getPrecedence() > 4) {
             return $this->jsonResponse(data: $data, message: 'not allowed', code: 403);
         }
-        $this->authorize('view');
+        $this->authorize('view', $user);
         $data['user'] = new UserResource($user);
         $data['settings'] = GlobalSetting::all();
         return $this->jsonResponse(data: $data, message: 'All settings', code: 200);
     }
 
-    public function show($id){
+    public function show($id)
+    {
         $user = auth()->guard('api')->user();
         $data['user'] = new UserResource($user);
         if ($user->user_type->getPrecedence() > 4) {
             return $this->jsonResponse(data: $data, message: 'not allowed', code: 403);
         }
+        $this->authorize('viewAny', $user);
         $data['user'] = new UserResource($user);
         $data['settings'] = GlobalSetting::findOrFail($id);
         return $this->jsonResponse(data: $data, message: 'specific setting', code: 200);
     }
 
-    public function store(SettingStoreRequest $request){
+    public function store(SettingStoreRequest $request)
+    {
         $user = auth()->guard('api')->user();
         $data['user'] = new UserResource($user);
         if ($user->user_type->getPrecedence() > 2) {
@@ -61,48 +65,46 @@ class SettingController extends ResponseController
             return $this->jsonResponse(data: $data, message: 'not allowed', code: 403);
         }
         $setting = GlobalSetting::findOrFail($id);
-        if($request->value_type != $setting->value_type){
+        if ($request->value_type != $setting->value_type) {
             $old_value_type = $setting->value_type;
-            if($setting->{$old_value_type.'_value'}){
-                if($old_value_type == 'image' || $old_value_type == 'file')
-                {
-                    Storage::delete($setting->{$old_value_type.'_value'});
+            if ($setting->{$old_value_type . '_value'}) {
+                if ($old_value_type == 'image' || $old_value_type == 'file') {
+                    Storage::delete($setting->{$old_value_type . '_value'});
                 }
             }
-            $setting->{$old_value_type.'_value'} = null;
-            
+            $setting->{$old_value_type . '_value'} = null;
         }
         $setting->update($request->validated());
         $setting->save();
 
         $data['setting'] = $setting;
         return $this->jsonResponse(data: $data, message: 'settings updated successfully!!', code: 200);
-
     }
 
-    public function update(SettingUpdateRequest $request){
+    public function update(SettingUpdateRequest $request)
+    {
         $user = auth()->guard('api')->user();
         $data['user'] = new UserResource($user);
         if ($user->user_type->getPrecedence() > 1) {
             return $this->jsonResponse(data: $request->toArray(), message: 'not allowed', code: 403);
         }
         $setting = GlobalSetting::where('setting_key', $request->setting_key)->first();
-        if(!$setting){
+        if (!$setting) {
             return $this->jsonResponse(data: $data, message: 'settings not found', code: 404);
         }
         $value_type = $setting->value_type;
-        $setting->{$value_type.'_value'} = $request->setting_value; 
+        $setting->{$value_type . '_value'} = $request->setting_value;
 
-        if($value_type == 'image' || $value_type == 'file'){
-            $imageName = time().$request->setting_value->getClientOriginalName();
+        if ($value_type == 'image' || $value_type == 'file') {
+            $imageName = time() . $request->setting_value->getClientOriginalName();
             //store image in storage
-            $path = Storage::putFileAs('public/uploads/setting',$request->setting_value,$imageName);
-            $setting->{$value_type.'_value'} = $path;
+            $path = Storage::putFileAs('public/uploads/setting', $request->setting_value, $imageName);
+            $setting->{$value_type . '_value'} = $path;
         }
         $setting->save();
-        
+
         $data['setting'] = $setting;
-        return $this->jsonResponse(data: $data, message: 'settings updated successfully!!', code: 200);       
+        return $this->jsonResponse(data: $data, message: 'settings updated successfully!!', code: 200);
     }
 
     protected function bulkDelete(BulkDelete $request)
@@ -133,7 +135,7 @@ class SettingController extends ResponseController
             return $this->jsonResponse(data: $request->toArray(), message: 'not allowed', code: 403);
         }
         $restoreSetting = GlobalSetting::onlyTrashed()->whereIn('id', $request->bulk)->get();
-        if(!$restoreSetting->count()){
+        if (!$restoreSetting->count()) {
             return $this->jsonResponse(data: $data, message: 'settings not found', code: 422);
         }
         foreach ($restoreSetting as $restore) {
@@ -148,14 +150,13 @@ class SettingController extends ResponseController
         $user = auth()->guard('api')->user();
         $data['user'] = new UserResource($user);
         $permaDelete = GlobalSetting::onlyTrashed()->whereIn('id', $request->bulk)->get();
-        if(!$permaDelete->count()){
+        if (!$permaDelete->count()) {
             return $this->jsonResponse(data: $data, message: 'settings not found', code: 422);
         }
         foreach ($permaDelete as $permadelete) {
-            if($permadelete->value_type == 'image' || $permadelete->value_type == 'file')
-            {
+            if ($permadelete->value_type == 'image' || $permadelete->value_type == 'file') {
                 $value_type = $permadelete->value_type;
-                Storage::delete($permadelete->{$value_type.'_value'});
+                Storage::delete($permadelete->{$value_type . '_value'});
             }
             $permadelete->forceDelete();
         }

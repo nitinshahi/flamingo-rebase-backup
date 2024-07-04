@@ -18,8 +18,9 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-Route::get('test',function ()  {
-   return 1; 
+
+Route::get('test', function () {
+    return 1;
 });
 Route::prefix('v1')->group(function () {
     Route::prefix('admin')->group(function () {
@@ -37,36 +38,36 @@ Route::prefix('v1')->group(function () {
                 Route::post('perma-delete', 'bulkPermaDelete');
             });
         });
-        Route::prefix('setting')->controller(SettingController::class)->group(function(){
-            Route::post('add-settings','store');
-            Route::get('all-settings','index');
-            Route::get('show/{id}','show');
-            Route::put('edit/{id}','editsettings');
-            Route::post('update','update');
+        Route::prefix('setting')->controller(SettingController::class)->group(function () {
+            Route::post('add-settings', 'store');
+            Route::get('all-settings', 'index');
+            Route::get('show/{id}', 'show');
+            Route::put('edit/{id}', 'editsettings');
+            Route::post('update', 'update');
             Route::prefix('bulk')->group(function () {
                 Route::post('delete', 'bulkDelete');
                 Route::post('restore', 'bulkRestore');
                 Route::post('perma-delete', 'bulkPermaDelete');
             });
         });
-        Route::prefix('author')->controller(AuthorController::class)->group(function(){
-            Route::post('add-author','store');
+        Route::prefix('author')->controller(AuthorController::class)->group(function () {
+            Route::post('add-author', 'store');
             Route::get('all-author', 'index');
-            Route::get('show/{id}','show');
-            Route::post('edit/{id}','update');
-            Route::post('test','test');
+            Route::get('show/{id}', 'show');
+            Route::post('edit/{id}', 'update');
+            Route::post('test', 'test');
         });
-        Route::prefix('blogcategory')->controller(BlogCategoryController::class)->group(function(){
-            Route::post('add-blogcategory','store');
+        Route::prefix('blogcategory')->controller(BlogCategoryController::class)->group(function () {
+            Route::post('add-blogcategory', 'store');
             Route::get('all', 'index');
-            Route::get('show/{id}','show');
-            Route::post('edit/{id}','update');
+            Route::get('show/{id}', 'show');
+            Route::post('edit/{id}', 'update');
         });
-        Route::prefix('blog')->controller(BlogController::class)->group(function(){
-            Route::post('add','store');
+        Route::prefix('blog')->controller(BlogController::class)->group(function () {
+            Route::post('add', 'store');
             Route::get('all', 'index');
-            Route::get('show/{id}','show');
-            Route::post('edit/{id}','update');
+            Route::get('show/{id}', 'show');
+            Route::post('edit/{id}', 'update');
         });
     });
 });

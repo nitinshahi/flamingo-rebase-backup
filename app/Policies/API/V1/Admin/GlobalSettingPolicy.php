@@ -13,7 +13,7 @@ class GlobalSettingPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return auth()->guard('api')->user()->user_type->getPrecedence() < 3;
     }
 
     /**
@@ -21,12 +21,13 @@ class GlobalSettingPolicy
      */
     public function view(User $user, GlobalSetting $globalSetting): bool
     {
-        return false;
+        return auth()->guard('api')->user()->user_type->getPrecedence() < 3;
     }
 
     /**
      * Determine whether the user can create models.
      */
+
     public function create(User $user): bool
     {
         return false;

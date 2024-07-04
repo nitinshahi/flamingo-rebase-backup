@@ -8,14 +8,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class GlobalSetting extends Model
 {
-    use HasFactory,SoftDeletes;
+    use HasFactory, SoftDeletes;
     protected $fillable = [
         'setting_label',
         'setting_key',
         'setting_group',
         'setting_status',
         'setting_description',
-        'value_type', 
+        'value_type',
     ];
     protected $hidden = [
         'boolean_value',
@@ -32,11 +32,11 @@ class GlobalSetting extends Model
         'setting_value'
     ];
 
-    public function getSettingValueAttribute() {
+    public function getSettingValueAttribute()
+    {
         // $value_attribute = $this->attributes['value_type'].'_value';
         // return $this->attributes[$value_attribute];
         $value_type = $this->value_type;
-        return $this->{$value_type.'_value'};
+        return $this->{$value_type . '_value'};
     }
-
 }
